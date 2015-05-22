@@ -20,14 +20,29 @@ class BrainSocketEventListener implements MessageComponentInterface {
 	}
 
 	public function onMessage(ConnectionInterface $from, $msg) {
-		$numRecv = count($this->clients) - 1;
+            $msgData = json_decode($msg, TRUE);
+            if(isset($msgData['client']['data']['self']))
+            {
+                echo sprintf('Connection %d sending message "%s" to server' . "\n"
+			, $from->resourceId, $msg);
+                $from->send($this->response->make($msg));
+            } else
+            {
+                $numRecv = count($this->clients) - 1;
 		echo sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n"
 			, $from->resourceId, $msg, $numRecv, $numRecv == 1 ? '' : 's');
-
-        $message = $this->response->make($msg);
-		foreach ($this->clients as $client) {
-			$client->send($message);
-		}
+                $path = $from->WebSocket->request->getPath(); 
+                if(count($this->clients))
+                {
+                    $resp = $this->response->make($msg);
+                    foreach ($this->clients as $client) {
+                        if($client->WebSocket->request->getPath() == $path)
+                        {
+                            $client->send($resp);
+                        }
+                    }
+                }
+            }
 	}
 
 	public function onClose(ConnectionInterface $conn) {
