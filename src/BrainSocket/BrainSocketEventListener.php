@@ -21,7 +21,11 @@ class BrainSocketEventListener implements MessageComponentInterface {
 
 	public function onMessage(ConnectionInterface $from, $msg) {
             $msgData = json_decode($msg, TRUE);
-            if(isset($msgData['client']['data']['self']))
+            $msgData['user_ip'] = $from->remoteAddress;
+
+            $resp = $this->response->make(json_encode($msgData));
+            
+            if(strpos($resp, '"event":"private.') !== FALSE)
             {
                 echo sprintf('Connection %d sending message "%s" to server' . "\n"
 			, $from->resourceId, $msg);
@@ -34,7 +38,7 @@ class BrainSocketEventListener implements MessageComponentInterface {
                 $path = $from->WebSocket->request->getPath(); 
                 if(count($this->clients))
                 {
-                    $resp = $this->response->make($msg);
+                    
                     foreach ($this->clients as $client) {
                         if($client->WebSocket->request->getPath() == $path)
                         {
