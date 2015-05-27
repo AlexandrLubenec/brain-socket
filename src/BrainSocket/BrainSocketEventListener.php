@@ -35,17 +35,15 @@ class BrainSocketEventListener implements MessageComponentInterface {
                 $numRecv = count($this->clients) - 1;
 		echo sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n"
 			, $from->resourceId, $msg, $numRecv, $numRecv == 1 ? '' : 's');
-                $path = $from->WebSocket->request->getPath(); 
-                if(count($this->clients))
-                {
+                $path = isset($msgData['client']['data']['path']) ? $msgData['client']['data']['path'] : $from->WebSocket->request->getPath(); 
                     
-                    foreach ($this->clients as $client) {
-                        if($client->WebSocket->request->getPath() == $path)
-                        {
-                            $client->send($resp);
-                        }
+                foreach ($this->clients as $client) {
+                    if($client->WebSocket->request->getPath() == $path)
+                    {
+                        $client->send($resp);
                     }
                 }
+                
             }
 	}
 
