@@ -16,15 +16,16 @@ class BrainSocketEventListener implements MessageComponentInterface {
 
 	public function onOpen(ConnectionInterface $conn) {
 		echo "Connection Established! \n";
-		$this->clients->attach($conn);
+		$this->clients->attach($conn, ['user_id' => \Crypt::decrypt($conn->WebSocket->request->getQuery()->get('u'))]);
 	}
 
 	public function onMessage(ConnectionInterface $from, $msg) {
             $msgData = json_decode($msg, TRUE);
-            $msgData['user_ip'] = $from->remoteAddress;
-
-            $resp = $this->response->make(json_encode($msgData));
             
+            \Config::set('socket.user', $this->clients[$from]['user_id']);
+            \Config::set('socket.user_ip', $from->remoteAddress);
+            $resp = $this->response->make(json_encode($msgData));
+           
             if(strpos($resp, '"event":"private.') !== FALSE)
             {
                 echo sprintf('Connection %d sending message "%s" to server' . "\n"
@@ -43,7 +44,6 @@ class BrainSocketEventListener implements MessageComponentInterface {
                         $client->send($resp);
                     }
                 }
-                
             }
 	}
 
