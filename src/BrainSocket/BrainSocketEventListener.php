@@ -22,8 +22,8 @@ class BrainSocketEventListener implements MessageComponentInterface {
 	public function onMessage(ConnectionInterface $from, $msg) {
             $msgData = json_decode($msg, TRUE);
             
-            \Config::set('socket.user', $this->clients[$from]['user_id']);
-            \Config::set('socket.user_ip', $from->remoteAddress);
+            $msgData['client']['data']['user']['user_id'] = $this->clients[$from]['user_id'];
+            $msgData['client']['data']['user']['user_ip'] = $from->remoteAddress;
             $resp = $this->response->make(json_encode($msgData));
            
             if(strpos($resp, '"event":"private.') !== FALSE)
