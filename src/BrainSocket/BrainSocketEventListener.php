@@ -30,7 +30,7 @@ class BrainSocketEventListener implements MessageComponentInterface {
             {
                 echo sprintf('Connection %d sending message "%s" to server' . "\n"
 			, $from->resourceId, $msg);
-                $from->send($this->response->make($msg));
+                $from->send($resp);
             } else
             {
                 $numRecv = count($this->clients) - 1;
